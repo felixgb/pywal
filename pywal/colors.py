@@ -55,7 +55,6 @@ def color_diff(rgb1, hex_color2):
     lab2 = convert_color(srgb2, LabColor)
 
     d = delta_e_cie2000(lab1, lab2)
-    print("dif between {} and {} is {}".format(srgb1, srgb2, d))
     return d
 
 def match_colors(colors):
