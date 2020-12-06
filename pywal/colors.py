@@ -54,8 +54,7 @@ def color_diff(rgb1, hex_color2):
     srgb2 = sRGBColor(r2, g2, b2)
     lab2 = convert_color(srgb2, LabColor)
 
-    d = delta_e_cie2000(lab1, lab2)
-    return d
+    return delta_e_cie2000(lab1, lab2)
 
 def match_colors(colors):
     out = [None] * len(colors)
