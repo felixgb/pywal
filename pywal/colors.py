@@ -6,6 +6,10 @@ import os
 import random
 import re
 import sys
+from pprint import pprint
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
 from . import theme
 from . import util
@@ -18,9 +22,36 @@ def list_backends():
             os.scandir(os.path.join(MODULE_DIR, "backends"))
             if "__" not in b.name]
 
+def hex_to_rgb(hex_color):
+    hex_color = hex_color.lstrip("#")
+    return tuple(int(hex_color[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+
+def color_diff(hex_color1 hex_color2):
+    (r1, g1, b1) = hex_to_rgb(hex_color1)
+    srgb1 = sRGBColor(r1, g1, b1)
+    lab1 = convert_color(srgb1, LabColor)
+
+    (r2, g2, b2) = hex_to_rgb(hex_color2)
+    srgb2 = sRGBColor(r2, g2, b2)
+    lab2 = convert_color(srgb2, LabColor)
+
+    return delta_e_cie2000(lab1, lab2)
+
+def reddest_color(colors):
+    red = sRGBColor(1.0, 0.0, 0.0)
+    red_lab = convert_color(red, LabColor);
+    for color in colors:
+        (r, g, b) = hex_to_rgb(color)
+        color_rgb = sRGBColor(r, g, b)
+        color_lab = convert_color(color_rgb, LabColor)
+        delta_e = delta_e_cie2000(red_lab, color_lab)
+        print(color)
+        print(delta_e)
+        print()
 
 def colors_to_dict(colors, img):
     """Convert list of colors to pywal format."""
+    reddest_color(colors)
     return {
         "wallpaper": img,
         "alpha": util.Color.alpha_num,
@@ -33,7 +64,7 @@ def colors_to_dict(colors, img):
 
         "colors": {
             "color0": colors[0],
-            "color1": colors[1],
+            "color1": "#ff0000",
             "color2": colors[2],
             "color3": colors[3],
             "color4": colors[4],
