@@ -9,6 +9,7 @@ import sys
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
+from math import sqrt
 
 from . import theme
 from . import util
@@ -23,14 +24,14 @@ x_colors_b = [
         (205, 0, 205),   # Magenta
         (0, 205, 205),   # Cyan
         (229, 229, 229), # White
-        (127, 127, 127), # Bright Black (Gray)
         (255, 0, 0),     # Bright Red
         (0, 255, 0),     # Bright Green       
         (255, 255, 0),   # Bright Yellow  
         (92, 92, 255),   # Bright Blue
         (255, 0, 255),   # Bright Magenta
         (0, 255, 255),   # Bright Cyan        
-        (255, 255, 255)  # Bright White       
+        (127, 127, 127), # Bright Black (Gray)
+        (255, 255, 255), # Bright White       
         ]
 
 x_colors = [(r / 255.0, g / 255.0, b / 255.0) for r, g, b in x_colors_b]
@@ -47,14 +48,16 @@ def hex_to_rgb(hex_color):
 
 def color_diff(rgb1, hex_color2):
     (r1, g1, b1) = rgb1
-    srgb1 = sRGBColor(r1, g1, b1)
-    lab1 = convert_color(srgb1, LabColor)
-
     (r2, g2, b2) = hex_to_rgb(hex_color2)
-    srgb2 = sRGBColor(r2, g2, b2)
-    lab2 = convert_color(srgb2, LabColor)
+    # srgb1 = sRGBColor(r1, g1, b1)
+    # lab1 = convert_color(srgb1, LabColor)
 
-    return delta_e_cie2000(lab1, lab2)
+    # srgb2 = sRGBColor(r2, g2, b2)
+    # lab2 = convert_color(srgb2, LabColor)
+
+    # return delta_e_cie2000(lab1, lab2)
+    d = sqrt((r2 - r1) ** 2 + (g2 - g1) ** 2 + (b2 - b1) ** 2)
+    return d
 
 def match_colors(colors):
     out = [None] * len(colors)
