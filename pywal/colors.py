@@ -6,7 +6,6 @@ import os
 import random
 import re
 import sys
-from pprint import pprint
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
@@ -15,6 +14,26 @@ from . import theme
 from . import util
 from .settings import CACHE_DIR, MODULE_DIR, __cache_version__
 
+x_colors_b = [
+        (0, 0, 0),       # Black
+        (205, 0, 0),     # Red
+        (0, 205, 0),     # Green
+        (205, 205, 0),   # Yellow
+        (0, 0, 238),     # Blue
+        (205, 0, 205),   # Magenta
+        (0, 205, 205),   # Cyan
+        (229, 229, 229), # White
+        (127, 127, 127), # Bright Black (Gray)
+        (255, 0, 0),     # Bright Red
+        (0, 255, 0),     # Bright Green       
+        (255, 255, 0),   # Bright Yellow  
+        (92, 92, 255),   # Bright Blue
+        (255, 0, 255),   # Bright Magenta
+        (0, 255, 255),   # Bright Cyan        
+        (255, 255, 255)  # Bright White       
+        ]
+
+x_colors = [(r / 255.0, g / 255.0, b / 255.0) for r, g, b in x_colors_b]
 
 def list_backends():
     """List color backends."""
@@ -26,8 +45,8 @@ def hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
     return tuple(int(hex_color[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
 
-def color_diff(hex_color1 hex_color2):
-    (r1, g1, b1) = hex_to_rgb(hex_color1)
+def color_diff(rgb1, hex_color2):
+    (r1, g1, b1) = rgb1
     srgb1 = sRGBColor(r1, g1, b1)
     lab1 = convert_color(srgb1, LabColor)
 
@@ -35,51 +54,35 @@ def color_diff(hex_color1 hex_color2):
     srgb2 = sRGBColor(r2, g2, b2)
     lab2 = convert_color(srgb2, LabColor)
 
-    return delta_e_cie2000(lab1, lab2)
+    d = delta_e_cie2000(lab1, lab2)
+    print("dif between {} and {} is {}".format(srgb1, srgb2, d))
+    return d
 
-def reddest_color(colors):
-    red = sRGBColor(1.0, 0.0, 0.0)
-    red_lab = convert_color(red, LabColor);
-    for color in colors:
-        (r, g, b) = hex_to_rgb(color)
-        color_rgb = sRGBColor(r, g, b)
-        color_lab = convert_color(color_rgb, LabColor)
-        delta_e = delta_e_cie2000(red_lab, color_lab)
-        print(color)
-        print(delta_e)
-        print()
+def match_colors(colors):
+    out = [None] * len(colors)
+    cs = colors.copy()
+    for i, x_color in enumerate(x_colors):
+        l = lambda x: color_diff(x_color, x)
+        desired = min(cs, key=l) 
+        out[i] = desired
+        cs.remove(desired)
+    return out
 
 def colors_to_dict(colors, img):
     """Convert list of colors to pywal format."""
-    reddest_color(colors)
+    cs = match_colors(colors)
+    ok = {'color{}'.format(i): v for i, v in enumerate(cs)}
     return {
         "wallpaper": img,
         "alpha": util.Color.alpha_num,
 
         "special": {
-            "background": colors[0],
-            "foreground": colors[15],
-            "cursor": colors[15]
+            "background": cs[0],
+            "foreground": cs[15],
+            "cursor": cs[15]
         },
 
-        "colors": {
-            "color0": colors[0],
-            "color1": "#ff0000",
-            "color2": colors[2],
-            "color3": colors[3],
-            "color4": colors[4],
-            "color5": colors[5],
-            "color6": colors[6],
-            "color7": colors[7],
-            "color8": colors[8],
-            "color9": colors[9],
-            "color10": colors[10],
-            "color11": colors[11],
-            "color12": colors[12],
-            "color13": colors[13],
-            "color14": colors[14],
-            "color15": colors[15]
-        }
+        "colors": ok
     }
 
 
