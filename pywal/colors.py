@@ -6,9 +6,6 @@ import os
 import random
 import re
 import sys
-from colormath.color_objects import sRGBColor, LabColor
-from colormath.color_conversions import convert_color
-from colormath.color_diff import delta_e_cie2000
 from math import sqrt
 
 from . import theme
@@ -49,15 +46,7 @@ def hex_to_rgb(hex_color):
 def color_diff(rgb1, hex_color2):
     (r1, g1, b1) = rgb1
     (r2, g2, b2) = hex_to_rgb(hex_color2)
-    # srgb1 = sRGBColor(r1, g1, b1)
-    # lab1 = convert_color(srgb1, LabColor)
-
-    # srgb2 = sRGBColor(r2, g2, b2)
-    # lab2 = convert_color(srgb2, LabColor)
-
-    # return delta_e_cie2000(lab1, lab2)
-    d = sqrt((r2 - r1) ** 2 + (g2 - g1) ** 2 + (b2 - b1) ** 2)
-    return d
+    return sqrt((r2 - r1) ** 2 + (g2 - g1) ** 2 + (b2 - b1) ** 2)
 
 def match_colors(colors):
     out = [None] * len(colors)
